@@ -1,0 +1,19 @@
+body {
+    font-family:'Courier New', Courier, monospace;
+    text-align: center;
+}
+
+#board {
+    /* background-color: skyblue; */
+    background-image: url("./flappybirdbg.png");
+}
+.radio-group {
+    display: inline-flex;
+    gap: 10px; /* Adds some space between each option */
+}
+
+.radio-group input,
+.radio-group label {
+    margin: 0;
+    display: inline-block;
+}

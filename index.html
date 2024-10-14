@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" , content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <link rel="stylesheet" href="flappybird.css">
+
+
+</head>
+
+<body>
+    <div style="padding-bottom: 5px;">
+        <form id="birdForm">
+            <label for="bird_name">Name:</label>
+            <input type="text" id="bird_name" value="Player1">
+            <label>Color:</label>
+            <select id="bird_color">
+                <option value="flappybird_yellow">Yellow</option>
+                <option value="flappybird_red">Red</option>
+                <option value="flappybird_black">Black</option>
+                <option value="flappybird_blue">Blue</option>
+                <option value="flappybird_green">Green</option>
+                <option value="flappybird_pro">Pro</option>
+            </select>
+
+            <input type="submit" value="Apply">
+        </form>
+    </div>
+    <canvas id="board"></canvas>
+    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
+    <script>
+        let actions;
+        const eraWidget = new EraWidget();
+        eraWidget.init({
+            needRealtimeConfigs: true,         /* Cần giá trị hiện thời */
+            needHistoryConfigs: true,          /* Cần giá trị lịch sử */
+            needActions: true,                 /* Cần các hành động (ví dụ Bật/Tắt đèn) */
+            maxRealtimeConfigsCount: 3,        /* Số lượng tối đa giá trị hiện thời */
+            maxHistoryConfigsCount: 1,         /* Số lượng tối đa giá trị lịch sử */
+            maxActionsCount: 2,                /* Số lượng tối đa các hành động có thể kích hoạt */
+            minRealtimeConfigsCount: 0,        /* Số lượng tối thiểu giá trị hiện thời */
+            minHistoryConfigsCount: 0,         /* Số lượng tối thiểu giá trị lịch sử */
+            minActionsCount: 0,                /* Số lượng tối thiểu hành động */
+
+            /* Hàm callback được gọi khi có cấu hình được nhận từ server */
+            onConfiguration: (configuration) => {
+                actions = configuration.actions;  // Lưu các hành động điều khiển
+            },
+            onValues: (abcd) => { },
+        });
+
+    </script>
+    <script src="flappybird.js"></script>
+    <script>
+        const form = document.getElementById('birdForm');
+        window.birdInfo = {
+            birdName: 'Player1',
+            birdColor: 'flappybird_yellow',
+            color: '#fef300',
+        };
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const birdName = document.getElementById('bird_name').value;
+            const birdColor = document.getElementById('bird_color').value;
+            let color = null;
+            switch (birdColor) {
+                case 'flappybird_red':
+                    color = '#d20302';
+                    break;
+                case 'flappybird_black':
+                    color = '#464749';
+                    break;
+                case 'flappybird_blue':
+                    color = '#2493ED';
+                    break;
+                case 'flappybird_green':
+                    color = '#a9f928';
+                    break;
+                case 'flappybird_pro':
+                    color = '#00ebff';
+                    break;
+                default:
+                    color = '#fef300';
+            }
+            window.birdInfo = {
+                birdName,
+                birdColor,
+                color,
+            }
+            console.log('window.birdInfo', window.birdInfo);
+            birdImg.src = `./${birdColor}.png`;
+
+            if (gameOver) {
+                bird.y = birdY;
+                pipeArray = [];
+                score = 0;
+                gameOver = false;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
