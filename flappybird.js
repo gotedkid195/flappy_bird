@@ -97,7 +97,6 @@ function update() {
             gameOver = true;
             if (score > highestScore){
                 highestScore = score;
-                console.log('score', score);
                 let data = JSON.stringify({value: {name: window.birdInfo.birdName, color: window.birdInfo.color, score}});
                 eraWidget.triggerAction(actions[0]?.action, 0, data);
             }
