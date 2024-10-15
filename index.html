@@ -24,8 +24,6 @@
                 <option value="flappybird_green">Green</option>
                 <option value="flappybird_pro">Pro</option>
             </select>
-
-            <input type="submit" value="Apply">
         </form>
     </div>
     <canvas id="board"></canvas>
@@ -54,17 +52,22 @@
     </script>
     <script src="flappybird.js"></script>
     <script>
-        const form = document.getElementById('birdForm');
+        const birdNameInput = document.getElementById('bird_name');
+        const birdColorSelect = document.getElementById('bird_color');
+        let resetGameTimeout = null;
+        // Initialize birdInfo with default values
         window.birdInfo = {
             birdName: 'Player1',
             birdColor: 'flappybird_yellow',
             color: '#fef300',
         };
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const birdName = document.getElementById('bird_name').value;
-            const birdColor = document.getElementById('bird_color').value;
+
+        // Function to update birdInfo
+        function updateBirdInfo() {
+            const birdName = birdNameInput.value;
+            const birdColor = birdColorSelect.value;
             let color = null;
+
             switch (birdColor) {
                 case 'flappybird_red':
                     color = '#d20302';
@@ -84,20 +87,35 @@
                 default:
                     color = '#fef300';
             }
+
             window.birdInfo = {
                 birdName,
                 birdColor,
                 color,
-            }
+            };
+
+            // Update bird image source (optional)
             birdImg.src = `./${birdColor}.png`;
 
-            if (gameOver) {
-                bird.y = birdY;
-                pipeArray = [];
-                score = 0;
-                gameOver = false;
+            // If there's already a reset timeout, clear it
+            if (resetGameTimeout) {
+                clearTimeout(resetGameTimeout);
             }
-        });
+
+            // Set a timeout to reset game variables after 1 second
+            resetGameTimeout = setTimeout(() => {
+                if (gameOver) {
+                    bird.y = birdY;
+                    pipeArray = [];
+                    score = 0;
+                    gameOver = false;
+                }
+            }, 3000);  // 3 second delay
+        }
+
+        // Listen for changes in the input fields and update birdInfo immediately
+        birdNameInput.addEventListener('input', updateBirdInfo);
+        birdColorSelect.addEventListener('change', updateBirdInfo);
     </script>
 
 </body>

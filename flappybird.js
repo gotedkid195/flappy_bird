@@ -158,6 +158,11 @@ function placePipes() {
 
 function moveBird(e) {
     if (e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX") {
+        const activeElement = document.activeElement;
+        // Check if the input field is focused
+        if (activeElement.tagName === 'INPUT') {
+            return;
+        }
         //jump
         velocityY = -6;
 
