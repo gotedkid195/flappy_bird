@@ -40,10 +40,12 @@ let score = 0;
 let birdColor;
 
 let highestScore = 0;
-let easy = 3
-let medium = 0
-let hard = 10
+let easy = 0;
+let medium = 10;
+let hard = 20;
 
+let pipeOscillationSpeed = 0.02; // speed of up-down oscillation
+let pipeAmplitude = 20; // amplitude of the vertical movement
 
 window.onload = function() {
     board = document.getElementById("board");
@@ -68,7 +70,6 @@ window.onload = function() {
     requestAnimationFrame(update);
     setInterval(placePipes, 1500); //every 1.5 seconds
     document.addEventListener("keydown", moveBird);
-    // setInterval(updateBottomPipe, 4000);
 }
 
 function update() {
@@ -90,9 +91,17 @@ function update() {
     for (let i = 0; i < pipeArray.length; i++) {
         let pipe = pipeArray[i];
         pipe.x += velocityX;
-        context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
 
-        if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+        let oscillation = 0;
+
+        // Apply oscillation only when score exceeds average level
+        if (score > medium) {
+            oscillation = pipeAmplitude * Math.sin(pipe.x * pipeOscillationSpeed);
+        }
+
+        context.drawImage(pipe.img, pipe.x, pipe.y + oscillation, pipe.width, pipe.height);
+
+        if (!pipe.passed && !pipe.skip && bird.x > pipe.x + pipe.width) {
             score += 0.5; //0.5 because there are 2 pipes! so 0.5*2 = 1, 1 for each set of pipes
             pipe.passed = true;
         }
@@ -121,7 +130,7 @@ function update() {
                   valuePlayers.push(user);
                 }
                 console.log('playerIndex', playerIndex, valuePlayers);
-                eraWidget.triggerAction(actions[0]?.action, 0, JSON.stringify({value: valuePlayers}));
+                eraWidget.triggerAction(actions[0].action, 0, JSON.stringify({value: valuePlayers}));
             }
         }
     }
@@ -150,75 +159,46 @@ function placePipes() {
     // 0 -> -128 (pipeHeight/4)
     // 1 -> -128 - 256 (pipeHeight/4 - pipeHeight/2) = -3/4 pipeHeight
     let randomPipeY = pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2);
-    let openingSpace;
-    let topPipe;
-    let bottomPipe;
+    let openingSpace = score > hard ? board.height / 5 : board.height / 4;
 
-    if (score > easy) {
-        openingSpace = board.height/5;
-    } else {
-        openingSpace = board.height/4;
-    }
+    const pipesToAdd = [
+        {
+            img: topPipeImg,
+            x: pipeX,
+            y: randomPipeY,
+            width: pipeWidth,
+            height: pipeHeight,
+            passed: false,
+            skip: false,
+        },
+        {
+            img: bottomPipeImg,
+            x: pipeX,
+            y: randomPipeY + pipeHeight + openingSpace,
+            width: pipeWidth,
+            height: pipeHeight,
+            passed: false,
+            skip: false,
+        }
+    ];
 
-    if(score > medium){
-        topPipe = {
-            img : topPipeImg,
-            x : pipeX,
-            y : randomPipeY,
-            width : pipeWidth,
-            height : pipeHeight,
-            passed : false
-        }
-        pipeArray.push(topPipe);
-        topPipe = {
-            img : topPipeImg,
-            x : pipeX + 50,
-            y : randomPipeY - 10,
-            width : pipeWidth,
-            height : pipeHeight,
-            passed : false
-        }
-    } else {
-        topPipe = {
-            img : topPipeImg,
-            x : pipeX,
-            y : randomPipeY,
-            width : pipeWidth,
-            height : pipeHeight,
-            passed : false
-        }
-    }
-    pipeArray.push(topPipe);
-
-    if(score > medium){
-        bottomPipe = {
-            img : bottomPipeImg,
-            x : pipeX,
-            y : randomPipeY + pipeHeight + openingSpace,
-            width : pipeWidth,
-            height : pipeHeight,
-            passed : false
-        }
-        pipeArray.push(bottomPipe);
-        bottomPipe = {
-            img : bottomPipeImg,
-            x : pipeX + 50,
-            y : randomPipeY + pipeHeight + openingSpace + 10,
-            width : pipeWidth,
-            height : pipeHeight,
-            passed : false
-        }
-    } else {
-        bottomPipe = {
-            img : bottomPipeImg,
-            x : pipeX,
-            y : randomPipeY + pipeHeight + openingSpace,
-            width : pipeWidth,
-            height : pipeHeight,
-            passed : false
+    if (score > hard) {
+        pipesToAdd.push(
+            { ...pipesToAdd[0], x: pipeX + 40, y: randomPipeY - 10, skip: true },
+            { ...pipesToAdd[1], x: pipeX + 40, y: randomPipeY + 10 + pipeHeight + openingSpace, skip: true },
+        );
+    } else if (score > medium) {
+        if (score % 2) {
+            pipesToAdd.push(
+                { ...pipesToAdd[0], x: pipeX + 20, y: randomPipeY - 10, skip: true },
+            );
+        } else {
+            pipesToAdd.push(
+                { ...pipesToAdd[1], x: pipeX + 20, y: randomPipeY + 10 + pipeHeight + openingSpace, skip: true },
+            );
         }
     }
-    pipeArray.push(bottomPipe);
+    pipeArray.push(...pipesToAdd);
 }
 
 function moveBird(e) {
