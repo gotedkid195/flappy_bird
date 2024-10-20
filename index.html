@@ -6,8 +6,6 @@
     <meta name="viewport" , content="width=device-width, initial-scale=1.0">
     <title>Flappy Bird</title>
     <link rel="stylesheet" href="flappybird.css">
-
-
 </head>
 
 <body>
@@ -29,7 +27,7 @@
     <canvas id="board"></canvas>
     <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
     <script>
-        let actions;
+        let actions, configs, valuePlayers;
         const eraWidget = new EraWidget();
         eraWidget.init({
             needRealtimeConfigs: true,         /* Cần giá trị hiện thời */
@@ -44,9 +42,12 @@
 
             /* Hàm callback được gọi khi có cấu hình được nhận từ server */
             onConfiguration: (configuration) => {
+                configs =  configuration.realtime_configs[0];
                 actions = configuration.actions;  // Lưu các hành động điều khiển
             },
-            onValues: (abcd) => { },
+            onValues: (values) => { 
+                valuePlayers = JSON.parse(values[configs.id].value);
+            },
         });
 
     </script>
@@ -61,7 +62,7 @@
             birdColor: 'flappybird_yellow',
             color: '#fef300',
         };
-
+        console.log('Initialize birdInfo with default values', window.birdInfo )
         // Function to update birdInfo
         function updateBirdInfo() {
             const birdName = birdNameInput.value;
@@ -104,6 +105,7 @@
 
             // Set a timeout to reset game variables after 1 second
             resetGameTimeout = setTimeout(() => {
+                console.log('resetGameTimeout', gameOver)
                 if (gameOver) {
                     bird.y = birdY;
                     pipeArray = [];

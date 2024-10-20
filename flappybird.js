@@ -28,6 +28,7 @@ let pipeY = 0;
 
 let topPipeImg;
 let bottomPipeImg;
+let bottomPipeFlowerImg;
 
 //physics
 let velocityX = -2; //pipes moving left speed
@@ -39,6 +40,9 @@ let score = 0;
 let birdColor;
 
 let highestScore = 0;
+let easy = 3
+let medium = 0
+let hard = 10
 
 
 window.onload = function() {
@@ -58,11 +62,13 @@ window.onload = function() {
     topPipeImg.src = "./toppipe.png";
     bottomPipeImg = new Image();
     bottomPipeImg.src = "./bottompipe.png"; 
+    bottomPipeFlowerImg = new Image();
+    bottomPipeFlowerImg.src = "./bottompipe_flower.png"; 
 
     requestAnimationFrame(update);
     setInterval(placePipes, 1500); //every 1.5 seconds
     document.addEventListener("keydown", moveBird);
-    setInterval(updateBottomPipe, 17000);
+    // setInterval(updateBottomPipe, 4000);
 }
 
 function update() {
@@ -71,10 +77,8 @@ function update() {
         return;
     }
     context.clearRect(0, 0, board.width, board.height);
-
-    //bird
     velocityY += gravity;
-    // bird.y += velocityY;
+
     bird.y = Math.max(bird.y + velocityY, 0); //apply gravity to current bird.y, limit the bird.y to top of the canvas
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
@@ -97,8 +101,27 @@ function update() {
             gameOver = true;
             if (score > highestScore){
                 highestScore = score;
-                let data = JSON.stringify({value: {name: window.birdInfo.birdName, color: window.birdInfo.color, score}});
-                eraWidget.triggerAction(actions[0]?.action, 0, data);
+                if(!actions){
+                    console.log('Action null');
+                    return;
+                }
+                
+                console.log('valuePlayers', typeof valuePlayers, valuePlayers);
+                let user = {name: window.birdInfo.birdName, color: window.birdInfo.color, score};
+                let playerIndex = -1;
+
+                if (valuePlayers.length !== 0 ){
+                    playerIndex = valuePlayers.findIndex(player => player.name === user.name);
+                }
+                if (playerIndex !== -1) {
+                  // If player exists, update the player details
+                  valuePlayers[playerIndex] = user;
+                } else {
+                  // If player does not exist, insert the new user
+                  valuePlayers.push(user);
+                }
+                console.log('playerIndex', playerIndex, valuePlayers);
+                eraWidget.triggerAction(actions[0]?.action, 0, JSON.stringify({value: valuePlayers}));
             }
         }
     }
@@ -115,7 +138,6 @@ function update() {
     context.fillText(highestScore, 310, 45);
     if (gameOver) {
         context.fillText("GAME OVER", 45, 250);
-        bottomPipeImg.src = "./bottompipe.png";
     }
 }
 
@@ -129,35 +151,78 @@ function placePipes() {
     // 1 -> -128 - 256 (pipeHeight/4 - pipeHeight/2) = -3/4 pipeHeight
     let randomPipeY = pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2);
     let openingSpace;
-    if (score > 10) {
+    let topPipe;
+    let bottomPipe;
+
+    if (score > easy) {
         openingSpace = board.height/5;
     } else {
         openingSpace = board.height/4;
     }
 
-    let topPipe = {
-        img : topPipeImg,
-        x : pipeX,
-        y : randomPipeY,
-        width : pipeWidth,
-        height : pipeHeight,
-        passed : false
+    if(score > medium){
+        topPipe = {
+            img : topPipeImg,
+            x : pipeX,
+            y : randomPipeY,
+            width : pipeWidth,
+            height : pipeHeight,
+            passed : false
+        }
+        pipeArray.push(topPipe);
+        topPipe = {
+            img : topPipeImg,
+            x : pipeX + 50,
+            y : randomPipeY - 10,
+            width : pipeWidth,
+            height : pipeHeight,
+            passed : false
+        }
+    } else {
+        topPipe = {
+            img : topPipeImg,
+            x : pipeX,
+            y : randomPipeY,
+            width : pipeWidth,
+            height : pipeHeight,
+            passed : false
+        }
     }
     pipeArray.push(topPipe);
 
-    let bottomPipe = {
-        img : bottomPipeImg,
-        x : pipeX,
-        y : randomPipeY + pipeHeight + openingSpace,
-        width : pipeWidth,
-        height : pipeHeight,
-        passed : false
+    if(score > medium){
+        bottomPipe = {
+            img : bottomPipeImg,
+            x : pipeX,
+            y : randomPipeY + pipeHeight + openingSpace,
+            width : pipeWidth,
+            height : pipeHeight,
+            passed : false
+        }
+        pipeArray.push(bottomPipe);
+        bottomPipe = {
+            img : bottomPipeImg,
+            x : pipeX + 50,
+            y : randomPipeY + pipeHeight + openingSpace + 10,
+            width : pipeWidth,
+            height : pipeHeight,
+            passed : false
+        }
+    } else {
+        bottomPipe = {
+            img : bottomPipeImg,
+            x : pipeX,
+            y : randomPipeY + pipeHeight + openingSpace,
+            width : pipeWidth,
+            height : pipeHeight,
+            passed : false
+        }
     }
     pipeArray.push(bottomPipe);
 }
 
 function moveBird(e) {
-    if (e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX") {
+    if (e.code == "Space") {
         const activeElement = document.activeElement;
         // Check if the input field is focused
         if (activeElement.tagName === 'INPUT') {
@@ -181,10 +246,4 @@ function detectCollision(a, b) {
            a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
            a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
            a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
-}
-
-function updateBottomPipe() {
-    if(String(bottomPipeImg.src).includes("/bottompipe.png") && score > 10){
-        bottomPipeImg.src = "./bottompipe_flower.png";
-    }
 }
