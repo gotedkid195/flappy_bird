@@ -70,6 +70,7 @@ window.onload = function() {
     requestAnimationFrame(update);
     setInterval(placePipes, 1500); //every 1.5 seconds
     document.addEventListener("keydown", moveBird);
+    setInterval(triggerAction, 8000); //every 1.5 seconds
 }
 
 function update() {
@@ -115,7 +116,6 @@ function update() {
                     return;
                 }
                 
-                console.log('valuePlayers', typeof valuePlayers, valuePlayers);
                 let user = {name: window.birdInfo.birdName, color: window.birdInfo.color, score};
                 let playerIndex = -1;
 
@@ -226,4 +226,8 @@ function detectCollision(a, b) {
            a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
            a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
            a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
+}
+
+function triggerAction() {
+    eraWidget.triggerAction(actions[0].action, 0, JSON.stringify({value: []}));
 }
