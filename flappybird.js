@@ -47,6 +47,8 @@ let hard = 20;
 let pipeOscillationSpeed = 0.02; // speed of up-down oscillation
 let pipeAmplitude = 20; // amplitude of the vertical movement
 
+let stopGame = false;
+
 window.onload = function() {
     board = document.getElementById("board");
     board.height = boardHeight;
@@ -107,8 +109,9 @@ function update() {
             pipe.passed = true;
         }
 
-        if (detectCollision(bird, pipe)) {
+        if (detectCollision(bird, pipe, oscillation)) {
             gameOver = true;
+            stopGame = true;
             if (score > highestScore){
                 highestScore = score;
                 if(!actions){
@@ -203,6 +206,10 @@ function placePipes() {
 
 function moveBird(e) {
     if (e.code == "Space") {
+        if(stopGame){
+            stopGame = false;
+            return;
+        }
         const activeElement = document.activeElement;
         // Check if the input field is focused
         if (activeElement.tagName === 'INPUT') {
@@ -221,11 +228,12 @@ function moveBird(e) {
     }
 }
 
-function detectCollision(a, b) {
+function detectCollision(a, b, oscillation) {
+
     return a.x < b.x + b.width &&   //a's top left corner doesn't reach b's top right corner
            a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
-           a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
-           a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
+           a.y < (b.y + oscillation) + b.height &&  //a's top left corner doesn't reach b's bottom left corner
+           a.y + a.height > (b.y + oscillation);    //a's bottom left corner passes b's top left corner
 }
 
 function triggerAction() {
