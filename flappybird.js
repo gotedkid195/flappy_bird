@@ -118,22 +118,26 @@ function update() {
                     console.log('Action null');
                     return;
                 }
-                
-                let user = {name: window.birdInfo.birdName, color: window.birdInfo.color, score};
-                let playerIndex = -1;
+                try {
+                    let user = {name: window.birdInfo.birdName, color: window.birdInfo.color, score};
+                    let playerIndex = -1;
 
-                if (valuePlayers.length !== 0 ){
-                    playerIndex = valuePlayers.findIndex(player => player.name === user.name);
+                    if (valuePlayers.length !== 0 ){
+                        playerIndex = valuePlayers.findIndex(player => player.name === user.name);
+                    }
+                    if (playerIndex !== -1) {
+                    // If player exists, update the player details
+                    valuePlayers[playerIndex] = user;
+                    } else {
+                    // If player does not exist, insert the new user
+                    valuePlayers.push(user);
+                    }
+                    console.log('playerIndex', playerIndex, valuePlayers);
+                    eraWidget.triggerAction(actions[0].action, 0, JSON.stringify({value: valuePlayers}));
                 }
-                if (playerIndex !== -1) {
-                  // If player exists, update the player details
-                  valuePlayers[playerIndex] = user;
-                } else {
-                  // If player does not exist, insert the new user
-                  valuePlayers.push(user);
+                catch(err) {
+                    console.log('Error', err);
                 }
-                console.log('playerIndex', playerIndex, valuePlayers);
-                eraWidget.triggerAction(actions[0].action, 0, JSON.stringify({value: valuePlayers}));
             }
         }
     }
@@ -162,7 +166,7 @@ function placePipes() {
     // 0 -> -128 (pipeHeight/4)
     // 1 -> -128 - 256 (pipeHeight/4 - pipeHeight/2) = -3/4 pipeHeight
     let randomPipeY = pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2);
-    let openingSpace = score > hard ? board.height / 5 : board.height / 4;
+    let openingSpace = score > medium ? board.height / 5 : board.height / 4;
 
     const pipesToAdd = [
         {
