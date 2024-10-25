@@ -119,11 +119,11 @@ function update() {
                     return;
                 }
                 try {
-                    let user = {name: window.birdInfo.birdName, color: window.birdInfo.color, score};
+                    let user = {n: window.birdInfo.birdName, c: window.birdInfo.color, s:score};
                     let playerIndex = -1;
 
                     if (valuePlayers.length !== 0 ){
-                        playerIndex = valuePlayers.findIndex(player => player.name === user.name);
+                        playerIndex = valuePlayers.findIndex(player => player.n === user.n);
                     }
                     if (playerIndex !== -1) {
                     // If player exists, update the player details
